@@ -3,7 +3,7 @@
 # Rulebook
 A server-side rules screening mod for Fabric.
 
-It has support for [Placeholder API](https://placeholders.pb4.eu/user/general/) along with P-API's [Simplified Text Format](https://placeholders.pb4.eu/user/text-format/).
+It has support for [Placeholder API](https://placeholders.pb4.eu/user/general/) and [Simplified Text Format](https://placeholders.pb4.eu/user/text-format/).
 
 ## Commands (and permissions):
 - `/rulebook` and `/rules` - Displays the rules in chat (`rulebook.main`, available by default)
