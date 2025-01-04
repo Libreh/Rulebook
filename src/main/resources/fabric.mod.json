@@ -1,0 +1,26 @@
+{
+	"schemaVersion": 1,
+	"id": "rulebook",
+	"version": "${version}",
+	"name": "Rulebook",
+	"description": "Server-side rulebook mod for Fabric",
+	"authors": [
+		"Libreh"
+	],
+	"contact": {
+		"sources": "https://github.com/Libreh/Rulebook"
+	},
+	"license": "LGPLv3",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"me.libreh.rulebook.Rulebook"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.16.9",
+		"minecraft": "~1.21.4",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
