@@ -1,5 +1,3 @@
-![Video](https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExeHZuMzhtNm05enF6aGo5a3Q3Mmp5dWtjZG5nc2dkYWN2YzFsaDBlciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/OGSwg5hdEX9uTmU7wR/giphy.gif)
-
 # Rulebook
 A server-side rules screening mod for Fabric.
 
