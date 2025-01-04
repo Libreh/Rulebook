@@ -9,7 +9,7 @@ It has support for [Placeholder API](https://placeholders.pb4.eu/user/general/) 
 - `/rulebook update` - Resets all players' rule status and kicks them, forcing them to accept the rules again (requires `rulebook.update`)
 - `/rulebook update <players>` - Same as above but only for targeted players (requires `rulebook.update`)
 - `/rulebook update offline` - Same as above but only for offline players (requires `rulebook.update`)
-- `/rulebook accept` - Accept the rules (`rulebook.main`, available by default)
+- `/rulebook accept` - Used for accepting the rules (`rulebook.main`, available by default)
 
 ## Configuration
 ```json5
