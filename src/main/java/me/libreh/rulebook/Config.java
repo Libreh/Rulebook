@@ -28,7 +28,7 @@ public class Config {
     @SerializedName("accept_button")
     public String acceptButton = "<green>☑</green>";
     @SerializedName("kick messages")
-    public KickMessage messages = new KickMessage();
+    public KickMessage kickMessages = new KickMessage();
 
     public static class KickMessage {
         @SerializedName("didnt_accept")

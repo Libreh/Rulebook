@@ -102,7 +102,7 @@ public class Commands {
         var data = PlayerData.get(player);
         data.hasAccepted = false;
         PlayerData.STORAGE.save(player, data);
-        player.networkHandler.disconnect(TextParserUtils.formatText(Config.getConfig().messages.updatedRules));
+        player.networkHandler.disconnect(TextParserUtils.formatText(Config.getConfig().kickMessages.updatedRules));
 
         Rulebook.LOGGER.info(Arrays.toString(FabricLoader.getInstance().getGameDir().toFile().list()));
 

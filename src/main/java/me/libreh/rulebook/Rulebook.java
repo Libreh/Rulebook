@@ -53,7 +53,7 @@ public class Rulebook implements ModInitializer {
 							if (!(player.currentScreenHandler.slots.getFirst() instanceof BookSlot)) {
                                 JOIN_LIST.remove(playerUuid);
                                 RULEBOOK_LIST.remove(playerUuid);
-								player.networkHandler.disconnect(TextParserUtils.formatText(Config.getConfig().messages.didntAccept));
+								player.networkHandler.disconnect(TextParserUtils.formatText(Config.getConfig().kickMessages.didntAccept));
 							}
 						}
 					} else {
