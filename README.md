@@ -1,5 +1,5 @@
-<img src="https://raw.githubusercontent.com/Libreh/Rulebook/refs/heads/main/rulebook_reject.gif" width="430"/>
-<img src="https://raw.githubusercontent.com/Libreh/Rulebook/refs/heads/main/rulebook_accept.gif" width="430"/>
+<img src="https://raw.githubusercontent.com/Libreh/Rulebook/refs/heads/main/rulebook_reject.gif" width="400"/>
+<img src="https://raw.githubusercontent.com/Libreh/Rulebook/refs/heads/main/rulebook_accept.gif" width="400"/>
 
 # Rulebook
 A server-side rules screening mod for Fabric.
