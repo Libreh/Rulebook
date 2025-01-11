@@ -87,10 +87,7 @@ public class Commands {
                         .requires(source -> source.isExecutedByPlayer() && !PlayerData.get(source.getPlayer()).hasAccepted)
                         .requires(Permissions.require("rulebook.main", true))
                         .executes(context -> {
-                            var player = context.getSource().getPlayer();
-                            var data = PlayerData.get(player);
-                            data.hasAccepted = true;
-                            PlayerData.STORAGE.save(player, data);
+                            acceptRules(context.getSource().getPlayer());
 
                             return Command.SINGLE_SUCCESS;
                         })
@@ -98,7 +95,13 @@ public class Commands {
         );
     }
 
-    private static int updatePlayer(ServerPlayerEntity player) {
+    public static void acceptRules(ServerPlayerEntity player) {
+        var data = PlayerData.get(player);
+        data.hasAccepted = true;
+        PlayerData.STORAGE.save(player, data);
+    }
+
+    private static void updatePlayer(ServerPlayerEntity player) {
         var data = PlayerData.get(player);
         data.hasAccepted = false;
         PlayerData.STORAGE.save(player, data);
@@ -106,7 +109,6 @@ public class Commands {
 
         Rulebook.LOGGER.info(Arrays.toString(FabricLoader.getInstance().getGameDir().toFile().list()));
 
-        return Command.SINGLE_SUCCESS;
     }
 
     private static boolean hasPermission(ServerPlayerEntity player, String key) {
