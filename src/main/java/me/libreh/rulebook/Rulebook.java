@@ -3,21 +3,20 @@ package me.libreh.rulebook;
 import com.mojang.brigadier.Command;
 import eu.pb4.placeholders.api.TextParserUtils;
 import eu.pb4.playerdata.api.PlayerDataApi;
-import eu.pb4.sgui.api.elements.BookElementBuilder;
-import eu.pb4.sgui.virtual.book.BookSlot;
+import me.libreh.rulebook.commands.Commands;
+import me.libreh.rulebook.config.Config;
+import me.libreh.rulebook.config.PlayerData;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -38,71 +37,13 @@ public class Rulebook implements ModInitializer {
             dispatcher.register(literal("rules").requires(Permissions.require("rulebook.main", true)).executes(context -> showRules(context.getSource())));
         });
 
-        ServerTickEvents.START_SERVER_TICK.register(server -> {
-            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-                var playerUuid = player.getUuid();
-                if (JOIN_LIST.contains(playerUuid)) {
-                    if (!PlayerData.get(player).hasAccepted) {
-                        if (!RULEBOOK_LIST.contains(playerUuid)) {
-                            if (!(player.currentScreenHandler.slots.getFirst() instanceof BookSlot)) {
-                                RULEBOOK_LIST.add(playerUuid);
-                                openBookGui(player);
-                            }
-                        } else {
-                            if (!(player.currentScreenHandler.slots.getFirst() instanceof BookSlot)) {
-                                JOIN_LIST.remove(playerUuid);
-                                RULEBOOK_LIST.remove(playerUuid);
-                                player.networkHandler.disconnect(TextParserUtils.formatText(Config.getConfig().kickMessages.didntAccept));
-                            }
-                        }
-                    } else {
-                        JOIN_LIST.remove(playerUuid);
-                        RULEBOOK_LIST.remove(playerUuid);
-                        player.closeHandledScreen();
-                    }
-                }
-            }
-        });
-
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> JOIN_LIST.add(handler.getPlayer().getUuid()));
     }
-
-    private static void openBookGui(ServerPlayerEntity player) {
-        var rulesArray = generateBookPages();
-        var bookBuilder = new BookElementBuilder();
-        for (var rule : rulesArray) {
-            bookBuilder.addPage(rule);
-        }
-        bookBuilder.addPage(TextParserUtils.formatText(Config.getConfig().acceptConfirmation).copy().append(TextParserUtils.formatText(Config.getConfig().acceptButton)).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rulebook accept"))));
-        new RulebookGui(player, bookBuilder).open();
-    }
-
 
     public static int showRules(ServerCommandSource source) {
         source.sendFeedback(() -> TextParserUtils.formatText(generateRulesString()), false);
 
         return Command.SINGLE_SUCCESS;
-    }
-
-    private static List<Text> generateBookPages() {
-        List<Text> rulesList = new ArrayList<>();
-
-        String header = Config.getConfig().rulesHeader;
-        String schema = Config.getConfig().ruleSchema;
-
-        var rules = Config.getConfig().rules;
-
-        for (int index = 0; index < rules.size(); index++) {
-            var rule = rules.get(index);
-            String ruleTitle = rule.title;
-            String ruleDescription = rule.description;
-
-            String ruleBuilder = header + "\n" + parseRule(schema, index + 1, ruleTitle, ruleDescription);
-
-            rulesList.add(TextParserUtils.formatText(ruleBuilder));
-        }
-
-        return rulesList;
     }
 
     private static String generateRulesString() {
@@ -132,7 +73,7 @@ public class Rulebook implements ModInitializer {
         return rulesString.toString();
     }
 
-    private static String parseRule(String line, int ruleNumber, String ruleTitle, String ruleDescription) {
+    public static String parseRule(String line, int ruleNumber, String ruleTitle, String ruleDescription) {
         var rule = parseString(line, "rule_number", String.valueOf(ruleNumber));
         rule = parseString(rule, "rule_title", ruleTitle);
         rule = parseString(rule, "rule_description", ruleDescription);

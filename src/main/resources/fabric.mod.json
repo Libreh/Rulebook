@@ -17,6 +17,9 @@
 			"me.libreh.rulebook.Rulebook"
 		]
 	},
+	"mixins": [
+		"rulebook.mixins.json"
+	],
 	"depends": {
 		"fabricloader": ">=0.16.9",
 		"minecraft": "~1.21.4",

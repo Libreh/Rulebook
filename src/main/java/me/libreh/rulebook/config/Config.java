@@ -1,4 +1,4 @@
-package me.libreh.rulebook;
+package me.libreh.rulebook.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -32,9 +32,9 @@ public class Config {
 
     public static class KickMessage {
         @SerializedName("didnt_accept")
-        public String didntAccept = "<red>You have to accept the rules to play</red>";
+        public String didntAccept = "<red>You didn't accept the rules</red>";
         @SerializedName("updated_rules")
-        public String updatedRules = "<yellow>The rules have been updated, please reconnect</yellow>";
+        public String updatedRules = "<yellow>Rules updated, please reconnect</yellow>";
     }
 
     public static class Rule {

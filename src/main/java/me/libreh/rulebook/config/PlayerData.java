@@ -1,4 +1,4 @@
-package me.libreh.rulebook;
+package me.libreh.rulebook.config;
 
 import eu.pb4.playerdata.api.PlayerDataApi;
 import eu.pb4.playerdata.api.storage.JsonDataStorage;

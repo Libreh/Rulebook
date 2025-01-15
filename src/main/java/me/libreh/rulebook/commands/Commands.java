@@ -1,8 +1,11 @@
-package me.libreh.rulebook;
+package me.libreh.rulebook.commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import eu.pb4.placeholders.api.TextParserUtils;
+import me.libreh.rulebook.Rulebook;
+import me.libreh.rulebook.config.Config;
+import me.libreh.rulebook.config.PlayerData;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.command.argument.EntityArgumentType;
