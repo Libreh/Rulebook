@@ -32,9 +32,9 @@ Supports [Placeholder API](https://placeholders.pb4.eu/user/general/), [Simplifi
   // Messages for when players are kicked
   "kick_messages": {
     // When the accept button isn't clicked
-    "didnt_accept": "<red>You have to accept the rules to play</red>",
+    "didnt_accept": "<red>You didn't accept the rules</red>",
     // When said player's rules are updated
-    "updated_rules": "<yellow>The rules have been updated, please reconnect</yellow>"
+    "updated_rules": "<yellow>Rules updated, please reconnect</yellow>"
   },
   // All the different rules, each with a title and description
   "rules": [
