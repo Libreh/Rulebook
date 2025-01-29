@@ -2,7 +2,6 @@ package me.libreh.rulebook.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.annotations.SerializedName;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.*;
@@ -19,22 +18,15 @@ public class Config {
         return CONFIG;
     }
 
-    @SerializedName("rules_header")
     public String rulesHeader = "Rules Header\n";
-    @SerializedName("rule_schema")
     public String ruleSchema = "%rule_number%. %rule_title%\n%rule_description%\n";
-    @SerializedName("accept_confirmation")
-    public String acceptConfirmation = "Do you accept the rules?\nClick the checkmark if yes: ";
-    @SerializedName("accept_button")
-    public String acceptButton = "<green>☑</green>";
-    @SerializedName("kick messages")
+    public String finalPage = "By closing the rulebook <bold>%player:name%</bold> you hereby agree to <underline>all the rules</underline>";
     public KickMessage kickMessages = new KickMessage();
 
     public static class KickMessage {
-        @SerializedName("didnt_accept")
-        public String didntAccept = "<red>You didn't accept the rules</red>";
-        @SerializedName("updated_rules")
-        public String updatedRules = "<yellow>Rules updated, please reconnect</yellow>";
+        public String didntAccept = "<red>You didn't accept the rules!</red>";
+        public String didntRead = "<red>You didn't read all the rules!</red>";
+        public String updatedRules = "<yellow>Rules updated, please reconnect!</yellow>";
     }
 
     public static class Rule {

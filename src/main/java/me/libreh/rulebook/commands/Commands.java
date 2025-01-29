@@ -2,6 +2,8 @@ package me.libreh.rulebook.commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import eu.pb4.placeholders.api.PlaceholderContext;
+import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.TextParserUtils;
 import me.libreh.rulebook.Rulebook;
 import me.libreh.rulebook.config.Config;
@@ -13,7 +15,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.io.File;
-import java.util.Arrays;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -108,10 +109,7 @@ public class Commands {
         var data = PlayerData.get(player);
         data.hasAccepted = false;
         PlayerData.STORAGE.save(player, data);
-        player.networkHandler.disconnect(TextParserUtils.formatText(Config.getConfig().kickMessages.updatedRules));
-
-        Rulebook.LOGGER.info(Arrays.toString(FabricLoader.getInstance().getGameDir().toFile().list()));
-
+        player.networkHandler.disconnect(Placeholders.parseText(TextParserUtils.formatText(Config.getConfig().kickMessages.updatedRules), PlaceholderContext.of(player)));
     }
 
     private static boolean hasPermission(ServerPlayerEntity player, String key) {

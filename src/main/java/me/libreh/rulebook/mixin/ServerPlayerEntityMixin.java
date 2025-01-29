@@ -1,15 +1,16 @@
 package me.libreh.rulebook.mixin;
 
 import com.mojang.authlib.GameProfile;
+import eu.pb4.placeholders.api.PlaceholderContext;
+import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.TextParserUtils;
 import eu.pb4.sgui.api.elements.BookElementBuilder;
-import eu.pb4.sgui.api.gui.BookGui;
 import eu.pb4.sgui.virtual.book.BookScreenHandler;
 import me.libreh.rulebook.config.Config;
 import me.libreh.rulebook.config.PlayerData;
+import me.libreh.rulebook.gui.RulebookGui;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -55,7 +56,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
                         if (!(player.currentScreenHandler instanceof BookScreenHandler)) {
                             JOIN_LIST.remove(playerUuid);
                             RULEBOOK_LIST.remove(playerUuid);
-                            player.networkHandler.disconnect(TextParserUtils.formatText(Config.getConfig().kickMessages.didntAccept));
+                            player.networkHandler.disconnect(Placeholders.parseText(TextParserUtils.formatText(Config.getConfig().kickMessages.didntAccept), PlaceholderContext.of(player)));
                         }
                     }
                 } else {
@@ -70,19 +71,19 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
     }
 
     @Unique
-    private static void openBookGui(ServerPlayerEntity player) {
+    private void openBookGui(ServerPlayerEntity player) {
         var rulesArray = generateBookPages();
         var bookBuilder = new BookElementBuilder();
         for (var rule : rulesArray) {
             bookBuilder.addPage(rule);
         }
-        bookBuilder.addPage(TextParserUtils.formatText(Config.getConfig().acceptConfirmation).copy().append(TextParserUtils.formatText(Config.getConfig().acceptButton)).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rulebook accept"))));
-        new BookGui(player, bookBuilder).open();
+        bookBuilder.addPage(Placeholders.parseText(TextParserUtils.formatText(Config.getConfig().finalPage), PlaceholderContext.of(player)));
+        new RulebookGui(player, bookBuilder).open();
     }
 
 
     @Unique
-    private static List<Text> generateBookPages() {
+    private List<Text> generateBookPages() {
         List<Text> rulesList = new ArrayList<>();
 
         String header = Config.getConfig().rulesHeader;
@@ -97,7 +98,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
 
             String ruleBuilder = header + "\n" + parseRule(schema, index + 1, ruleTitle, ruleDescription);
 
-            rulesList.add(TextParserUtils.formatText(ruleBuilder));
+            rulesList.add(Placeholders.parseText(TextParserUtils.formatText(ruleBuilder), PlaceholderContext.of(((player)))));
         }
 
         return rulesList;

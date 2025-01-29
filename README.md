@@ -22,19 +22,17 @@ Supports [Placeholder API](https://placeholders.pb4.eu/user/general/), [Simplifi
 // New lines can be added with `\n`!
 {
   // Header at the top of each book page and at the top of the rules command
-  "rules_header": "Rules Header\n",
+  "rulesHeader": "Rules Header\n",
   // Rule formatting, supports the variables %rule_number%, %rule_title%, %rule_description%
-  "rule_schema": "%rule_number%. %rule_title%\n%rule_description%\n",
-  // At the top of the last page
-  "accept_confirmation": "Do you accept the rules?\nClick the checkmark if yes: ",
-  // At the bottom of the last page, click it to accept the rules
-  "accept_button": "<green>☑</green>",
+  "ruleSchema": "%rule_number%. %rule_title%\n%rule_description%\n",
+  // Displayed at the last page
+  "finalPage": "By closing the rulebook <bold>%player:name%</bold> you hereby agree to <underline>all the rules</underline>",
   // Messages for when players are kicked
-  "kick_messages": {
+  "kickMessages": {
     // When the accept button isn't clicked
-    "didnt_accept": "<red>You didn't accept the rules</red>",
+    "didntAccept": "<red>You didn't accept the rules</red>",
     // When said player's rules are updated
-    "updated_rules": "<yellow>Rules updated, please reconnect</yellow>"
+    "updatedRules": "<yellow>Rules updated, please reconnect</yellow>"
   },
   // All the different rules, each with a title and description
   "rules": [

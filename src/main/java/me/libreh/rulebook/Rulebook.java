@@ -1,6 +1,8 @@
 package me.libreh.rulebook;
 
 import com.mojang.brigadier.Command;
+import eu.pb4.placeholders.api.PlaceholderContext;
+import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.TextParserUtils;
 import eu.pb4.playerdata.api.PlayerDataApi;
 import me.libreh.rulebook.commands.Commands;
@@ -41,7 +43,7 @@ public class Rulebook implements ModInitializer {
     }
 
     public static int showRules(ServerCommandSource source) {
-        source.sendFeedback(() -> TextParserUtils.formatText(generateRulesString()), false);
+        source.sendFeedback(() -> (Placeholders.parseText(TextParserUtils.formatText(generateRulesString()), PlaceholderContext.of(source))), false);
 
         return Command.SINGLE_SUCCESS;
     }
