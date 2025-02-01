@@ -26,8 +26,10 @@ Supports [Placeholder API](https://placeholders.pb4.eu/user/general/), [Simplifi
   "finalPage": "By closing the rulebook <bold>%player:name%</bold> you hereby agree to <underline>all the rules</underline>",
   // Messages for when players are kicked
   "kickMessages": {
-    // When the accept button isn't clicked
+    // When the player didn't accept
     "didntAccept": "<red>You didn't accept the rules</red>",
+    // When the player didn't visit all pages
+    "didntRead": "<red>You didn't read all the rules!</red>",
     // When said player's rules are updated
     "updatedRules": "<yellow>Rules updated, please reconnect</yellow>"
   },
