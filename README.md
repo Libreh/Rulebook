@@ -6,6 +6,11 @@ Supports [Placeholder API](https://placeholders.pb4.eu/user/general/), [Simplifi
 <img src="https://raw.githubusercontent.com/Libreh/Rulebook/refs/heads/main/rulebook_reject.gif" width="400"/>
 <img src="https://raw.githubusercontent.com/Libreh/Rulebook/refs/heads/main/rulebook_accept.gif" width="400"/>
 
+## Clarifications
+You accept the rules by viewing all pages and closing the rulebook.
+You can close by clicking the `Done` or `Take Book` buttons, or pressing Escape on your keyboard.
+The `Take Book` button is not supposed to give the player the book (that's just what it says and AFAIK you can't change it server-side).
+
 ## Commands (and permissions):
 - `/rulebook` and `/rules` - Displays the rules in chat (`rulebook.main`, available by default)
 - `/rulebook reload` - Relods configuration (requires `rulebook.reload`)
@@ -41,6 +46,10 @@ Supports [Placeholder API](https://placeholders.pb4.eu/user/general/), [Simplifi
       "title": "more title",
       "description": "more description"
     }
+  ],
+  // List of players that have accepted
+  "acceptedPlayers": [
+    "a29f4bb7-9585-48b2-bd72-ff349a11a7e6"
   ]
 }
 ```
