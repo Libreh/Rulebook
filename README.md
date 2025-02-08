@@ -13,7 +13,7 @@ The `Take Book` button is not supposed to give the player the book (that's just 
 
 ## Commands (and permissions):
 - `/rulebook` and `/rules` - Displays the rules in chat (`rulebook.main`, available by default)
-- `/rulebook reload` - Relods configuration (requires `rulebook.reload`)
+- `/rulebook reload` - Reloads configuration (requires `rulebook.reload`)
 - `/rulebook update` - Resets all players' rule status and kicks them, forcing them to accept the rules again (requires `rulebook.update`)
 - `/rulebook update <players>` - Same as above but only for targeted players (requires `rulebook.update`)
 - `/rulebook update offline` - Same as above but only for offline players (requires `rulebook.update`)
