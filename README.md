@@ -48,9 +48,7 @@ The `Take Book` button is not supposed to give the player the book (that's just 
     }
   ],
   // List of players that have accepted
-  "acceptedPlayers": [
-    "a29f4bb7-9585-48b2-bd72-ff349a11a7e6"
-  ]
+  "acceptedPlayers": []
 }
 ```
 
