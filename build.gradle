@@ -28,7 +28,7 @@ dependencies {
 	modImplementation include("eu.pb4:sgui:${project.sgui_version}")
 	modImplementation include("eu.pb4:placeholder-api:${project.placeholder_api_version}")
 	modImplementation include("eu.pb4:player-data-api:${project.player_data_api_version}")
-	modImplementation include("me.lucko:fabric-permissions-api:${project.permissions_api_version}") { exclude(group: "net.fabricmc.fabric-api") }
+	modImplementation include("me.lucko:fabric-permissions-api:${project.permissions_api_version}")
 }
 
 processResources {

@@ -2,12 +2,18 @@ package me.libreh.rulebook.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import eu.pb4.placeholders.api.PlaceholderContext;
+import eu.pb4.placeholders.api.Placeholders;
+import eu.pb4.placeholders.api.TextParserUtils;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class Config {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
@@ -24,7 +30,6 @@ public class Config {
     public KickMessage kickMessages = new KickMessage();
 
     public static class KickMessage {
-        public String didntAccept = "<red>You didn't accept the rules!</red>";
         public String didntRead = "<red>You didn't read all the rules!</red>";
         public String updatedRules = "<yellow>Rules updated, please reconnect!</yellow>";
     }
@@ -43,6 +48,8 @@ public class Config {
             new Rule("title", "description"),
             new Rule("more title", "more description")
     );
+
+    public List<UUID> acceptedPlayers = new ArrayList<>();
 
     public static void load() {
         Config oldConfig = CONFIG;
@@ -63,5 +70,18 @@ public class Config {
         } catch (IOException exception) {
             CONFIG = oldConfig;
         }
+    }
+
+    public static boolean hasAccepted(ServerPlayerEntity player) {
+        return getConfig().acceptedPlayers.contains(player.getUuid());
+    }
+
+    public static void accept(ServerPlayerEntity player) {
+        getConfig().acceptedPlayers.add(player.getUuid());
+    }
+
+    public static void unaccept(ServerPlayerEntity player) {
+        getConfig().acceptedPlayers.remove(player.getUuid());
+        player.networkHandler.disconnect(Placeholders.parseText(TextParserUtils.formatText(Config.getConfig().kickMessages.updatedRules), PlaceholderContext.of(player)));
     }
 }

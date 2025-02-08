@@ -24,13 +24,11 @@ Supports [Placeholder API](https://placeholders.pb4.eu/user/general/), [Simplifi
   "ruleSchema": "%rule_number%. %rule_title%\n%rule_description%\n",
   // Displayed at the last page
   "finalPage": "By closing the rulebook <bold>%player:name%</bold> you hereby agree to <underline>all the rules</underline>",
-  // Messages for when players are kicked
+  // Messages for when a player is kicked
   "kickMessages": {
-    // When the player didn't accept
-    "didntAccept": "<red>You didn't accept the rules</red>",
-    // When the player didn't visit all pages
+    // Player hasn't visited all pages
     "didntRead": "<red>You didn't read all the rules!</red>",
-    // When said player's rules are updated
+    // Player's rules have been updated
     "updatedRules": "<yellow>Rules updated, please reconnect</yellow>"
   },
   // All the different rules, each with a title and description

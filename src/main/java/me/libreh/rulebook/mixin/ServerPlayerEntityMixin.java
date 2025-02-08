@@ -7,7 +7,6 @@ import eu.pb4.placeholders.api.TextParserUtils;
 import eu.pb4.sgui.api.elements.BookElementBuilder;
 import eu.pb4.sgui.virtual.book.BookScreenHandler;
 import me.libreh.rulebook.config.Config;
-import me.libreh.rulebook.config.PlayerData;
 import me.libreh.rulebook.gui.RulebookGui;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -46,17 +45,11 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
         rulebookTick++;
         if (rulebookTick == 4) {
             if (JOIN_LIST.contains(playerUuid)) {
-                if (!PlayerData.get(player).hasAccepted) {
+                if (!Config.hasAccepted(player)) {
                     if (!RULEBOOK_LIST.contains(playerUuid)) {
                         if (!(player.currentScreenHandler instanceof BookScreenHandler)) {
                             RULEBOOK_LIST.add(playerUuid);
                             openBookGui(player);
-                        }
-                    } else {
-                        if (!(player.currentScreenHandler instanceof BookScreenHandler)) {
-                            JOIN_LIST.remove(playerUuid);
-                            RULEBOOK_LIST.remove(playerUuid);
-                            player.networkHandler.disconnect(Placeholders.parseText(TextParserUtils.formatText(Config.getConfig().kickMessages.didntAccept), PlaceholderContext.of(player)));
                         }
                     }
                 } else {

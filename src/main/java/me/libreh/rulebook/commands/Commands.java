@@ -2,19 +2,12 @@ package me.libreh.rulebook.commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import eu.pb4.placeholders.api.PlaceholderContext;
-import eu.pb4.placeholders.api.Placeholders;
-import eu.pb4.placeholders.api.TextParserUtils;
 import me.libreh.rulebook.Rulebook;
 import me.libreh.rulebook.config.Config;
-import me.libreh.rulebook.config.PlayerData;
 import me.lucko.fabric.api.permissions.v0.Permissions;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-
-import java.io.File;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -40,28 +33,20 @@ public class Commands {
                         )
                         .executes(context -> {
                             for (ServerPlayerEntity player : context.getSource().getServer().getPlayerManager().getPlayerList()) {
-                                updatePlayer(player);
+                                Config.unaccept(player);
                             }
 
-                            try {
-                                for (File file : FabricLoader.getInstance().getGameDir().resolve("world/player-mod-data").toFile().listFiles()) {
-                                    if (file.isDirectory()) {
-                                        for (File jsonFile : file.listFiles()) {
-                                            if (jsonFile.getName().equals("rulebook.json")) {
-                                                jsonFile.delete();
-                                            }
-                                        }
-                                    }
-                                }
-                            } catch (Exception ignored) {}
+                            Config.getConfig().acceptedPlayers.removeIf(uuid -> context.getSource().getServer().getPlayerManager().getPlayer(uuid) == null);
+                            Config.load();
 
                             return Command.SINGLE_SUCCESS;
                         })
                         .then(argument("players", EntityArgumentType.players())
                                 .executes(context -> {
                                     for (ServerPlayerEntity player : EntityArgumentType.getPlayers(context, "players")) {
-                                        updatePlayer(player);
+                                        Config.unaccept(player);
                                     }
+                                    Config.load();
 
                                     return Command.SINGLE_SUCCESS;
                                 })
@@ -71,45 +56,24 @@ public class Commands {
                                         hasPermission(source.getPlayer(), "rulebook.reload")) || (!source.isExecutedByPlayer())
                                 )
                                 .executes(context -> {
-                                    try {
-                                        for (File file : FabricLoader.getInstance().getGameDir().resolve("world/player-mod-data").toFile().listFiles()) {
-                                            if (file.isDirectory()) {
-                                                for (File jsonFile : file.listFiles()) {
-                                                    if (jsonFile.getName().equals("rulebook.json")) {
-                                                        jsonFile.delete();
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    } catch (Exception ignored) {}
+                                    Config.getConfig().acceptedPlayers.removeIf(uuid -> context.getSource().getServer().getPlayerManager().getPlayer(uuid) == null);
+                                    Config.load();
 
                                     return Command.SINGLE_SUCCESS;
                                 })
                         )
                 )
                 .then(literal("accept")
-                        .requires(source -> source.isExecutedByPlayer() && !PlayerData.get(source.getPlayer()).hasAccepted)
+                        .requires(source -> source.isExecutedByPlayer() && Config.hasAccepted(source.getPlayer()))
                         .requires(Permissions.require("rulebook.main", true))
                         .executes(context -> {
-                            acceptRules(context.getSource().getPlayer());
+                            Config.accept(context.getSource().getPlayer());
+                            Config.load();
 
                             return Command.SINGLE_SUCCESS;
                         })
                 )
         );
-    }
-
-    public static void acceptRules(ServerPlayerEntity player) {
-        var data = PlayerData.get(player);
-        data.hasAccepted = true;
-        PlayerData.STORAGE.save(player, data);
-    }
-
-    private static void updatePlayer(ServerPlayerEntity player) {
-        var data = PlayerData.get(player);
-        data.hasAccepted = false;
-        PlayerData.STORAGE.save(player, data);
-        player.networkHandler.disconnect(Placeholders.parseText(TextParserUtils.formatText(Config.getConfig().kickMessages.updatedRules), PlaceholderContext.of(player)));
     }
 
     private static boolean hasPermission(ServerPlayerEntity player, String key) {

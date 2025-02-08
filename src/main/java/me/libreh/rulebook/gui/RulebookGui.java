@@ -5,7 +5,6 @@ import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.TextParserUtils;
 import eu.pb4.sgui.api.elements.BookElementBuilder;
 import eu.pb4.sgui.api.gui.BookGui;
-import me.libreh.rulebook.commands.Commands;
 import me.libreh.rulebook.config.Config;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -60,7 +59,7 @@ public class RulebookGui extends BookGui {
 
     private void acceptIfViewedAll() {
         if (VIEWED_PAGES.size() == book.get(DataComponentTypes.WRITTEN_BOOK_CONTENT).getPages(false).size()) {
-            Commands.acceptRules(player);
+            Config.accept(player);
         } else {
             var playerUuid = player.getUuid();
             JOIN_LIST.remove(playerUuid);
