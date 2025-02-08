@@ -11,6 +11,8 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.command.ServerCommandSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,12 +21,14 @@ import java.util.UUID;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class Rulebook implements ModInitializer {
+    public static final String MOD_ID = "rulebook";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     public static final Set<UUID> JOIN_LIST = new HashSet<>();
     public static final Set<UUID> RULEBOOK_LIST = new HashSet<>();
 
     @Override
     public void onInitialize() {
-        Config.load();
+        Config.loadConfig();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
             Commands.register(dispatcher);

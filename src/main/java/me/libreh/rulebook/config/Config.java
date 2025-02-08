@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.TextParserUtils;
+import me.libreh.rulebook.Rulebook;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.network.ServerPlayerEntity;
 
@@ -51,25 +52,45 @@ public class Config {
 
     public List<UUID> acceptedPlayers = new ArrayList<>();
 
-    public static void load() {
+    public static boolean loadConfig() {
         Config oldConfig = CONFIG;
+        boolean success;
 
         CONFIG = null;
         try {
-            File configFile = new File(FabricLoader.getInstance().getConfigDir().toFile(), "rulebook.json");
+            File configFile = getConfigFile();
 
-            Config config = configFile.exists() ? GSON.fromJson(new InputStreamReader(new FileInputStream(configFile), StandardCharsets.UTF_8), Config.class) : new Config();
-
-            CONFIG = config;
+            CONFIG = configFile.exists() ? GSON.fromJson(new InputStreamReader(new FileInputStream(configFile), StandardCharsets.UTF_8), Config.class) : new Config();
 
             {
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(configFile), StandardCharsets.UTF_8));
-                writer.write(GSON.toJson(config));
-                writer.close();
+
             }
+            saveConfig();
+            success = true;
         } catch (IOException exception) {
+            success = false;
             CONFIG = oldConfig;
+            Rulebook.LOGGER.error("Something went wrong while reading config!");
+            exception.printStackTrace();
         }
+
+        return success;
+    }
+
+    public static void saveConfig() {
+        try {
+            File configFile = getConfigFile();
+
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(configFile), StandardCharsets.UTF_8));
+            writer.write(GSON.toJson(CONFIG));
+            writer.close();
+        } catch (Exception exception) {
+            Rulebook.LOGGER.error("Something went wrong while saving config!", exception);
+        }
+    }
+
+    private static File getConfigFile() {
+        return new File(FabricLoader.getInstance().getConfigDir().toFile(), "rulebook.json");
     }
 
     public static boolean hasAccepted(ServerPlayerEntity player) {
@@ -78,10 +99,12 @@ public class Config {
 
     public static void accept(ServerPlayerEntity player) {
         getConfig().acceptedPlayers.add(player.getUuid());
+        Config.saveConfig();
     }
 
     public static void unaccept(ServerPlayerEntity player) {
         getConfig().acceptedPlayers.remove(player.getUuid());
-        player.networkHandler.disconnect(Placeholders.parseText(TextParserUtils.formatText(Config.getConfig().kickMessages.updatedRules), PlaceholderContext.of(player)));
+        Config.saveConfig();
+        player.networkHandler.disconnect(Placeholders.parseText(TextParserUtils.formatText(getConfig().kickMessages.updatedRules), PlaceholderContext.of(player)));
     }
 }

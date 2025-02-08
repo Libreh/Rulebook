@@ -9,6 +9,8 @@ import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 
+import java.util.UUID;
+
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -22,7 +24,7 @@ public class Commands {
                                 hasPermission(source.getPlayer(), "rulebook.reload")) || (!source.isExecutedByPlayer())
                         )
                         .executes(context -> {
-                            Config.load();
+                            Config.saveConfig();
 
                             return Command.SINGLE_SUCCESS;
                         })
@@ -36,8 +38,12 @@ public class Commands {
                                 Config.unaccept(player);
                             }
 
-                            Config.getConfig().acceptedPlayers.removeIf(uuid -> context.getSource().getServer().getPlayerManager().getPlayer(uuid) == null);
-                            Config.load();
+                            for (UUID uuid : Config.getConfig().acceptedPlayers) {
+                                if (context.getSource().getServer().getPlayerManager().getPlayer(uuid) == null) {
+                                    Config.getConfig().acceptedPlayers.remove(uuid);
+                                    Config.saveConfig();
+                                }
+                            }
 
                             return Command.SINGLE_SUCCESS;
                         })
@@ -46,7 +52,6 @@ public class Commands {
                                     for (ServerPlayerEntity player : EntityArgumentType.getPlayers(context, "players")) {
                                         Config.unaccept(player);
                                     }
-                                    Config.load();
 
                                     return Command.SINGLE_SUCCESS;
                                 })
@@ -56,8 +61,12 @@ public class Commands {
                                         hasPermission(source.getPlayer(), "rulebook.reload")) || (!source.isExecutedByPlayer())
                                 )
                                 .executes(context -> {
-                                    Config.getConfig().acceptedPlayers.removeIf(uuid -> context.getSource().getServer().getPlayerManager().getPlayer(uuid) == null);
-                                    Config.load();
+                                    for (UUID uuid : Config.getConfig().acceptedPlayers) {
+                                        if (context.getSource().getServer().getPlayerManager().getPlayer(uuid) == null) {
+                                            Config.getConfig().acceptedPlayers.remove(uuid);
+                                            Config.saveConfig();
+                                        }
+                                    }
 
                                     return Command.SINGLE_SUCCESS;
                                 })
@@ -68,7 +77,7 @@ public class Commands {
                         .requires(Permissions.require("rulebook.main", true))
                         .executes(context -> {
                             Config.accept(context.getSource().getPlayer());
-                            Config.load();
+                            Config.saveConfig();
 
                             return Command.SINGLE_SUCCESS;
                         })
