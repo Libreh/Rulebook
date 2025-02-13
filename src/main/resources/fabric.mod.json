@@ -3,7 +3,7 @@
 	"id": "rulebook",
 	"version": "${version}",
 	"name": "Rulebook",
-	"description": "Server-side rulebook mod for Fabric",
+	"description": "Rules screening mod",
 	"authors": [
 		"Libreh"
 	],

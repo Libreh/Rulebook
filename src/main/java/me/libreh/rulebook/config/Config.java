@@ -52,9 +52,8 @@ public class Config {
 
     public List<UUID> acceptedPlayers = new ArrayList<>();
 
-    public static boolean loadConfig() {
+    public static void loadConfig() {
         Config oldConfig = CONFIG;
-        boolean success;
 
         CONFIG = null;
         try {
@@ -66,15 +65,11 @@ public class Config {
 
             }
             saveConfig();
-            success = true;
         } catch (IOException exception) {
-            success = false;
             CONFIG = oldConfig;
             Rulebook.LOGGER.error("Something went wrong while reading config!");
             exception.printStackTrace();
         }
-
-        return success;
     }
 
     public static void saveConfig() {
@@ -90,7 +85,7 @@ public class Config {
     }
 
     private static File getConfigFile() {
-        return new File(FabricLoader.getInstance().getConfigDir().toFile(), "rulebook.json");
+        return new File(FabricLoader.getInstance().getConfigDir().toFile(), Rulebook.MOD_ID + ".json");
     }
 
     public static boolean hasAccepted(ServerPlayerEntity player) {
