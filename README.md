@@ -13,6 +13,7 @@ The `Take Book` button is not supposed to give the player the book (that's just 
 
 ## Commands (and permissions):
 - `/rulebook` and `/rules` - Displays the rules in chat (`rulebook.main`, available by default)
+- `/rulebook open` and `/rules open` - Displays the rules as a book (`rulebook.main`, available by default)
 - `/rulebook reload` - Reloads configuration (requires `rulebook.reload`)
 - `/rulebook update` - Resets all players' rule status and kicks them, forcing them to accept the rules again (requires `rulebook.update`)
 - `/rulebook update <players>` - Same as above but only for targeted players (requires `rulebook.update`)
@@ -24,17 +25,17 @@ The `Take Book` button is not supposed to give the player the book (that's just 
 // New lines can be added with `\n`!
 {
   // Header at the top of each book page and at the top of the rules command
-  "rulesHeader": "Rules Header\n",
+  "rules_header": "Rules Header\n",
   // Rule formatting, supports the variables %rule_number%, %rule_title%, %rule_description%
-  "ruleSchema": "%rule_number%. %rule_title%\n%rule_description%\n",
+  "rule_schema": "%rule_number%. %rule_title%\n%rule_description%\n",
   // Displayed at the last page
-  "finalPage": "By closing the rulebook <bold>%player:name%</bold> you hereby agree to <underline>all the rules</underline>",
+  "final_page": "By closing the rulebook <bold>%player:name%</bold> you hereby agree to <underline>all the rules</underline>",
   // Messages for when a player is kicked
-  "kickMessages": {
+  "kick_messages": {
     // Player hasn't visited all pages
-    "didntRead": "<red>You didn't read all the rules!</red>",
+    "didnt_read": "<red>You didn't read all the rules!</red>",
     // Player's rules have been updated
-    "updatedRules": "<yellow>Rules updated, please reconnect</yellow>"
+    "updated_rules": "<yellow>Rules updated, please reconnect</yellow>"
   },
   // All the different rules, each with a title and description
   "rules": [
@@ -48,10 +49,9 @@ The `Take Book` button is not supposed to give the player the book (that's just 
     }
   ],
   // List of players that have accepted
-  "acceptedPlayers": []
+  "accepted_players": []
 }
 ```
 
 ## Credits
-Parts of this mod are inspired by and uses code by:
-- [LilydevMC/Rules](https://github.com/LilydevMC/Rules)
+- [LilydevMC/Rules](https://github.com/LilydevMC/Rules) [code and inspiration]
