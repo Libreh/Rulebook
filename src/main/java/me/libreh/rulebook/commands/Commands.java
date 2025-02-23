@@ -3,11 +3,13 @@ package me.libreh.rulebook.commands;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import me.libreh.rulebook.Rulebook;
-import me.libreh.rulebook.config.Config;
+import me.libreh.rulebook.config.ConfigManager;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 import java.util.UUID;
 
@@ -16,15 +18,29 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public class Commands {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+        var config = ConfigManager.getConfig();
+
         dispatcher.register(literal("rulebook")
                 .requires(Permissions.require("rulebook.main", true))
                 .executes(context -> Rulebook.showRules(context.getSource()))
+                .then(literal("open")
+                        .requires(Permissions.require("rulebook.main", true))
+                        .executes(context -> {
+                            Rulebook.openBookGui(context.getSource().getPlayer());
+
+                            return Command.SINGLE_SUCCESS;
+                        })
+                )
                 .then(literal("reload")
                         .requires(source -> (source.isExecutedByPlayer() &&
                                 hasPermission(source.getPlayer(), "rulebook.reload")) || (!source.isExecutedByPlayer())
                         )
                         .executes(context -> {
-                            Config.saveConfig();
+                            if (ConfigManager.loadConfig()) {
+                                context.getSource().sendFeedback(() -> Text.literal("Reloaded config!"), false);
+                            } else {
+                                context.getSource().sendError(Text.literal("Error occurred while reloading config!").formatted(Formatting.RED));
+                            }
 
                             return Command.SINGLE_SUCCESS;
                         })
@@ -35,13 +51,13 @@ public class Commands {
                         )
                         .executes(context -> {
                             for (ServerPlayerEntity player : context.getSource().getServer().getPlayerManager().getPlayerList()) {
-                                Config.unaccept(player);
+                                ConfigManager.unaccept(player);
                             }
 
-                            for (UUID uuid : Config.getConfig().acceptedPlayers) {
+                            for (UUID uuid : config.acceptedPlayers) {
                                 if (context.getSource().getServer().getPlayerManager().getPlayer(uuid) == null) {
-                                    Config.getConfig().acceptedPlayers.remove(uuid);
-                                    Config.saveConfig();
+                                    config.acceptedPlayers.remove(uuid);
+                                    ConfigManager.loadConfig();
                                 }
                             }
 
@@ -50,7 +66,7 @@ public class Commands {
                         .then(argument("players", EntityArgumentType.players())
                                 .executes(context -> {
                                     for (ServerPlayerEntity player : EntityArgumentType.getPlayers(context, "players")) {
-                                        Config.unaccept(player);
+                                        ConfigManager.unaccept(player);
                                     }
 
                                     return Command.SINGLE_SUCCESS;
@@ -61,10 +77,10 @@ public class Commands {
                                         hasPermission(source.getPlayer(), "rulebook.reload")) || (!source.isExecutedByPlayer())
                                 )
                                 .executes(context -> {
-                                    for (UUID uuid : Config.getConfig().acceptedPlayers) {
+                                    for (UUID uuid : config.acceptedPlayers) {
                                         if (context.getSource().getServer().getPlayerManager().getPlayer(uuid) == null) {
-                                            Config.getConfig().acceptedPlayers.remove(uuid);
-                                            Config.saveConfig();
+                                            ConfigManager.getConfig().acceptedPlayers.remove(uuid);
+                                            ConfigManager.loadConfig();
                                         }
                                     }
 
@@ -73,11 +89,11 @@ public class Commands {
                         )
                 )
                 .then(literal("accept")
-                        .requires(source -> source.isExecutedByPlayer() && Config.hasAccepted(source.getPlayer()))
+                        .requires(source -> source.isExecutedByPlayer() && ConfigManager.hasAccepted(source.getPlayer()))
                         .requires(Permissions.require("rulebook.main", true))
                         .executes(context -> {
-                            Config.accept(context.getSource().getPlayer());
-                            Config.saveConfig();
+                            ConfigManager.accept(context.getSource().getPlayer());
+                            ConfigManager.loadConfig();
 
                             return Command.SINGLE_SUCCESS;
                         })

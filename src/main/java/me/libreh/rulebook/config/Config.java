@@ -1,37 +1,32 @@
 package me.libreh.rulebook.config;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import eu.pb4.placeholders.api.PlaceholderContext;
-import eu.pb4.placeholders.api.Placeholders;
-import eu.pb4.placeholders.api.TextParserUtils;
-import me.libreh.rulebook.Rulebook;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.server.network.ServerPlayerEntity;
+import com.google.gson.annotations.SerializedName;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 public class Config {
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+    public static final Config DEFAULT = new Config();
+    public String _comment = "Before changing anything, see https://github.com/Libreh/Rulebook#configuration";
 
-    private static Config CONFIG;
+    @SerializedName("config_version")
+    public int version = ConfigManager.VERSION;
 
-    public static Config getConfig() {
-        return CONFIG;
-    }
-
+    @SerializedName("rules_header")
     public String rulesHeader = "Rules Header\n";
+    @SerializedName("rule_schema")
     public String ruleSchema = "%rule_number%. %rule_title%\n%rule_description%\n";
+    @SerializedName("final_page")
     public String finalPage = "By closing the rulebook <bold>%player:name%</bold> you hereby agree to <underline>all the rules</underline>";
+    @SerializedName("kick_messages")
     public KickMessage kickMessages = new KickMessage();
 
     public static class KickMessage {
+        @SerializedName("didnt_read")
         public String didntRead = "<red>You didn't read all the rules!</red>";
+        @SerializedName("updated_rules")
         public String updatedRules = "<yellow>Rules updated, please reconnect!</yellow>";
     }
 
@@ -50,56 +45,6 @@ public class Config {
             new Rule("more title", "more description")
     );
 
+    @SerializedName("accepted_players")
     public List<UUID> acceptedPlayers = new ArrayList<>();
-
-    public static void loadConfig() {
-        Config oldConfig = CONFIG;
-
-        CONFIG = null;
-        try {
-            File configFile = getConfigFile();
-
-            CONFIG = configFile.exists() ? GSON.fromJson(new InputStreamReader(new FileInputStream(configFile), StandardCharsets.UTF_8), Config.class) : new Config();
-
-            {
-
-            }
-            saveConfig();
-        } catch (IOException exception) {
-            CONFIG = oldConfig;
-            Rulebook.LOGGER.error("Something went wrong while reading config!");
-            exception.printStackTrace();
-        }
-    }
-
-    public static void saveConfig() {
-        try {
-            File configFile = getConfigFile();
-
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(configFile), StandardCharsets.UTF_8));
-            writer.write(GSON.toJson(CONFIG));
-            writer.close();
-        } catch (Exception exception) {
-            Rulebook.LOGGER.error("Something went wrong while saving config!", exception);
-        }
-    }
-
-    private static File getConfigFile() {
-        return new File(FabricLoader.getInstance().getConfigDir().toFile(), Rulebook.MOD_ID + ".json");
-    }
-
-    public static boolean hasAccepted(ServerPlayerEntity player) {
-        return getConfig().acceptedPlayers.contains(player.getUuid());
-    }
-
-    public static void accept(ServerPlayerEntity player) {
-        getConfig().acceptedPlayers.add(player.getUuid());
-        Config.saveConfig();
-    }
-
-    public static void unaccept(ServerPlayerEntity player) {
-        getConfig().acceptedPlayers.remove(player.getUuid());
-        Config.saveConfig();
-        player.networkHandler.disconnect(Placeholders.parseText(TextParserUtils.formatText(getConfig().kickMessages.updatedRules), PlaceholderContext.of(player)));
-    }
 }

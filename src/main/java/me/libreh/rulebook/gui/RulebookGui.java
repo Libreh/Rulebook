@@ -5,7 +5,7 @@ import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.TextParserUtils;
 import eu.pb4.sgui.api.elements.BookElementBuilder;
 import eu.pb4.sgui.api.gui.BookGui;
-import me.libreh.rulebook.config.Config;
+import me.libreh.rulebook.config.ConfigManager;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 
@@ -59,12 +59,12 @@ public class RulebookGui extends BookGui {
 
     private void acceptIfViewedAll() {
         if (VIEWED_PAGES.size() == book.get(DataComponentTypes.WRITTEN_BOOK_CONTENT).getPages(false).size()) {
-            Config.accept(player);
+            ConfigManager.accept(player);
         } else {
             var playerUuid = player.getUuid();
             JOIN_LIST.remove(playerUuid);
             RULEBOOK_LIST.remove(playerUuid);
-            player.networkHandler.disconnect(Placeholders.parseText(TextParserUtils.formatText(Config.getConfig().kickMessages.didntRead), PlaceholderContext.of(player)));
+            player.networkHandler.disconnect(Placeholders.parseText(TextParserUtils.formatText(ConfigManager.getConfig().kickMessages.didntRead), PlaceholderContext.of(player)));
         }
     }
 }
