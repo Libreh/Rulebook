@@ -24,6 +24,10 @@ The `Take Book` button is not supposed to give the player the book (that's just 
 ```json5
 // New lines can be added with `\n`!
 {
+  // You're on the right page! (Ha, get it?)
+  "_comment": "Before changing anything, see https://github.com/Libreh/Rulebook#configuration",
+  // Do not touch!
+  "config_version": 1,
   // Header at the top of each book page and at the top of the rules command
   "rules_header": "Rules Header\n",
   // Rule formatting, supports the variables %rule_number%, %rule_title%, %rule_description%
