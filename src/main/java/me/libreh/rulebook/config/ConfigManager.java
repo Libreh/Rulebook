@@ -32,12 +32,10 @@ public class ConfigManager {
         boolean ENABLED;
 
         try {
-            Config config = CONFIG;
+            Config config;
 
             if (Files.exists(CONFIG_PATH)) {
-                if (config == null) {
-                    config = GSON.fromJson(Files.readString(CONFIG_PATH), Config.class);
-                }
+                config = GSON.fromJson(Files.readString(CONFIG_PATH), Config.class);
             } else {
                 config = new Config();
             }
@@ -71,13 +69,13 @@ public class ConfigManager {
     public static void accept(ServerPlayerEntity player) {
         if (!getConfig().acceptedPlayers.contains(player.getUuid())) {
             getConfig().acceptedPlayers.add(player.getUuid());
-            loadConfig();
+            overrideConfig(getConfig());
         }
     }
 
     public static void unaccept(ServerPlayerEntity player) {
         getConfig().acceptedPlayers.remove(player.getUuid());
-        loadConfig();
+        overrideConfig(getConfig());
         player.networkHandler.disconnect(Placeholders.parseText(TextParserUtils.formatText(CONFIG.kickMessages.updatedRules), PlaceholderContext.of(player)));
     }
 }

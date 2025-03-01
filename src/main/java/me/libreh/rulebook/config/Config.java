@@ -40,6 +40,7 @@ public class Config {
         }
     }
 
+    @SerializedName("rules")
     public List<Rule> rules = Arrays.asList(
             new Rule("title", "description"),
             new Rule("more title", "more description")
