@@ -27,7 +27,7 @@ public class Commands {
                 .then(literal("open")
                         .requires(Permissions.require("rulebook.main", true))
                         .executes(context -> {
-                            Rulebook.openBookGui(context.getSource().getPlayer());
+                            Rulebook.openBookGui(context.getSource().getPlayer(), false);
 
                             return Command.SINGLE_SUCCESS;
                         })

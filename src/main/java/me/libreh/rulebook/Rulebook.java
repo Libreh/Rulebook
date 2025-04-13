@@ -3,7 +3,7 @@ package me.libreh.rulebook;
 import com.mojang.brigadier.Command;
 import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.Placeholders;
-import eu.pb4.placeholders.api.TextParserUtils;
+import eu.pb4.placeholders.api.parsers.NodeParser;
 import eu.pb4.sgui.api.elements.BookElementBuilder;
 import me.libreh.rulebook.commands.Commands;
 import me.libreh.rulebook.config.ConfigManager;
@@ -26,8 +26,12 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class Rulebook implements ModInitializer {
     public static final String MOD_ID = "rulebook";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    public static final Set<UUID> JOIN_LIST = new HashSet<>();
-    public static final Set<UUID> RULEBOOK_LIST = new HashSet<>();
+    public static final Set<UUID> joinedPlayers = new HashSet<>();
+    public static final Set<UUID> rulebookPlayers = new HashSet<>();
+    public static final NodeParser PARSER = NodeParser.builder()
+            .simplifiedTextFormat()
+            .quickText()
+            .build();
 
     @Override
     public void onInitialize() {
@@ -49,23 +53,27 @@ public class Rulebook implements ModInitializer {
             );
         });
 
-        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> JOIN_LIST.add(handler.getPlayer().getUuid()));
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> joinedPlayers.add(handler.getPlayer().getUuid()));
     }
 
     public static int showRules(ServerCommandSource source) {
-        source.sendFeedback(() -> (Placeholders.parseText(TextParserUtils.formatText(generateRulesString()), PlaceholderContext.of(source))), false);
+        source.sendFeedback(() -> (Placeholders.parseText(PARSER.parseNode(generateRulesString()), PlaceholderContext.of(source))), false);
 
         return Command.SINGLE_SUCCESS;
     }
 
     public static void openBookGui(ServerPlayerEntity player) {
+        openBookGui(player, true);
+    }
+
+    public static void openBookGui(ServerPlayerEntity player, boolean kick) {
         var rulesArray = generateBookPages(player);
         var bookBuilder = new BookElementBuilder();
         for (var rule : rulesArray) {
             bookBuilder.addPage(rule);
         }
-        bookBuilder.addPage(Placeholders.parseText(TextParserUtils.formatText(ConfigManager.getConfig().finalPage), PlaceholderContext.of(player)));
-        new RulebookGui(player, bookBuilder).open();
+        bookBuilder.addPage(Placeholders.parseText(PARSER.parseNode(ConfigManager.getConfig().finalPage), PlaceholderContext.of(player)));
+        new RulebookGui(player, bookBuilder, kick).open();
     }
 
     public static List<Text> generateBookPages(ServerPlayerEntity player) {
@@ -85,7 +93,7 @@ public class Rulebook implements ModInitializer {
 
             String ruleBuilder = header + "\n" + parseRule(schema, index + 1, ruleTitle, ruleDescription);
 
-            rulesList.add(Placeholders.parseText(TextParserUtils.formatText(ruleBuilder), PlaceholderContext.of(((player)))));
+            rulesList.add(Placeholders.parseText(PARSER.parseNode(ruleBuilder), PlaceholderContext.of(((player)))));
         }
 
         return rulesList;
