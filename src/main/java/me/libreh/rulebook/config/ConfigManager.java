@@ -2,6 +2,8 @@ package me.libreh.rulebook.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.TextParserUtils;
@@ -9,8 +11,11 @@ import me.libreh.rulebook.Rulebook;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.network.ServerPlayerEntity;
 
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
 
 import static me.libreh.rulebook.Rulebook.MOD_ID;
 
@@ -40,8 +45,32 @@ public class ConfigManager {
                 config = new Config();
             }
             config.version = VERSION;
+            var playerModDataDir = FabricLoader.getInstance().getGameDir().resolve("world/player-mod-data");
+            if (Files.exists(playerModDataDir)) {
+                Rulebook.LOGGER.info("PlayerDataAPI directory exists, starting migration...");
+                Files.walk(playerModDataDir)
+                        .filter(Files::isRegularFile)
+                        .filter(path -> path.toString().endsWith(".json"))
+                        .forEach(jsonFilePath -> {
+                            UUID playerUuid = UUID.fromString(jsonFilePath.getParent().getFileName().toString());
+                            if (!config.acceptedPlayers.contains(playerUuid)) {
+                                try(FileReader reader = new FileReader(jsonFilePath.toFile())) {
+                                    JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+
+                                    if (jsonObject.has("hasAccepted") && jsonObject.get("hasAccepted").getAsBoolean()) {
+                                        config.acceptedPlayers.add(playerUuid);
+                                        Rulebook.LOGGER.info("Migrating " + jsonFilePath.getParent().getFileName().toString());
+                                    }
+                                } catch (IOException e) {
+                                    Rulebook.LOGGER.info("Error migrating UUID " + jsonFilePath.getParent().getFileName());
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+            }
             overrideConfig(config);
             CONFIG = config;
+
             ENABLED = true;
         } catch(Throwable exception) {
             ENABLED = false;
@@ -50,6 +79,10 @@ public class ConfigManager {
         }
 
         return ENABLED;
+    }
+
+    public static void overrideConfig() {
+        overrideConfig(CONFIG);
     }
 
     public static void overrideConfig(Config configData) {
@@ -69,13 +102,13 @@ public class ConfigManager {
     public static void accept(ServerPlayerEntity player) {
         if (!getConfig().acceptedPlayers.contains(player.getUuid())) {
             getConfig().acceptedPlayers.add(player.getUuid());
-            overrideConfig(getConfig());
+            overrideConfig();
         }
     }
 
     public static void unaccept(ServerPlayerEntity player) {
         getConfig().acceptedPlayers.remove(player.getUuid());
-        overrideConfig(getConfig());
+        overrideConfig();
         player.networkHandler.disconnect(Placeholders.parseText(TextParserUtils.formatText(CONFIG.kickMessages.updatedRules), PlaceholderContext.of(player)));
     }
 }

@@ -14,7 +14,6 @@ import net.minecraft.util.Formatting;
 import java.util.UUID;
 
 import static me.libreh.rulebook.config.ConfigManager.getConfig;
-import static me.libreh.rulebook.config.ConfigManager.overrideConfig;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -59,7 +58,7 @@ public class Commands {
                             for (UUID uuid : config.acceptedPlayers) {
                                 if (context.getSource().getServer().getPlayerManager().getPlayer(uuid) == null) {
                                     config.acceptedPlayers.remove(uuid);
-                                    overrideConfig(getConfig());
+                                    ConfigManager.overrideConfig();
                                 }
                             }
 
@@ -82,7 +81,7 @@ public class Commands {
                                     for (UUID uuid : config.acceptedPlayers) {
                                         if (context.getSource().getServer().getPlayerManager().getPlayer(uuid) == null) {
                                             getConfig().acceptedPlayers.remove(uuid);
-                                            overrideConfig(getConfig());
+                                            ConfigManager.overrideConfig();
                                         }
                                     }
 
@@ -95,7 +94,7 @@ public class Commands {
                         .requires(Permissions.require("rulebook.main", true))
                         .executes(context -> {
                             ConfigManager.accept(context.getSource().getPlayer());
-                            overrideConfig(getConfig());
+                            ConfigManager.overrideConfig();
 
                             return Command.SINGLE_SUCCESS;
                         })
