@@ -65,6 +65,8 @@ public class ConfigManager {
                                     Rulebook.LOGGER.info("Error migrating UUID " + jsonFilePath.getParent().getFileName());
                                     e.printStackTrace();
                                 }
+                            } else {
+                                Rulebook.LOGGER.info("Skipping UUID " + jsonFilePath.getParent().getFileName() + " as player has already accepted the rules");
                             }
                         });
             }
