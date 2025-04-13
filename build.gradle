@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.9-SNAPSHOT'
+	id 'fabric-loom' version '1.10-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -27,7 +27,6 @@ dependencies {
 
 	modImplementation include("eu.pb4:sgui:${project.sgui_version}")
 	modImplementation include("eu.pb4:placeholder-api:${project.placeholder_api_version}")
-	modImplementation include("eu.pb4:player-data-api:${project.player_data_api_version}")
 	modImplementation include("me.lucko:fabric-permissions-api:${project.permissions_api_version}")
 }
 
