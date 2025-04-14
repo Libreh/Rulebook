@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.Placeholders;
-import eu.pb4.placeholders.api.TextParserUtils;
 import me.libreh.rulebook.Rulebook;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -65,6 +64,8 @@ public class ConfigManager {
                                     Rulebook.LOGGER.info("Error migrating UUID " + jsonFilePath.getParent().getFileName());
                                     e.printStackTrace();
                                 }
+                            } else {
+                                Rulebook.LOGGER.info("Skipping UUID " + jsonFilePath.getParent().getFileName() + " as player has already accepted the rules");
                             }
                         });
             }
@@ -109,6 +110,6 @@ public class ConfigManager {
     public static void unaccept(ServerPlayerEntity player) {
         getConfig().acceptedPlayers.remove(player.getUuid());
         overrideConfig();
-        player.networkHandler.disconnect(Placeholders.parseText(TextParserUtils.formatText(CONFIG.kickMessages.updatedRules), PlaceholderContext.of(player)));
+        player.networkHandler.disconnect(Placeholders.parseText(Rulebook.PARSER.parseNode(CONFIG.kickMessages.updatedRules), PlaceholderContext.of(player)));
     }
 }

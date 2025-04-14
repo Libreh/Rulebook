@@ -2,24 +2,27 @@ package me.libreh.rulebook.gui;
 
 import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.Placeholders;
-import eu.pb4.placeholders.api.TextParserUtils;
 import eu.pb4.sgui.api.elements.BookElementBuilder;
 import eu.pb4.sgui.api.gui.BookGui;
+import me.libreh.rulebook.Rulebook;
 import me.libreh.rulebook.config.ConfigManager;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.HashMap;
 
-import static me.libreh.rulebook.Rulebook.JOIN_LIST;
-import static me.libreh.rulebook.Rulebook.RULEBOOK_LIST;
+import static me.libreh.rulebook.Rulebook.joinedPlayers;
+import static me.libreh.rulebook.Rulebook.rulebookPlayers;
 
 public class RulebookGui extends BookGui {
-    public RulebookGui(ServerPlayerEntity player, BookElementBuilder book) {
+    private final boolean kick;
+
+    public RulebookGui(ServerPlayerEntity player, BookElementBuilder book, boolean kick) {
         super(player, book);
+        this.kick = kick;
     }
 
-    private final HashMap<Integer, Boolean> VIEWED_PAGES = new HashMap<>();
+    private final HashMap<Integer, Boolean> viewedPages = new HashMap<>();
 
     @Override
     public void onTakeBookButton() {
@@ -33,8 +36,8 @@ public class RulebookGui extends BookGui {
     public void onTick() {
         super.onTick();
 
-        if (!VIEWED_PAGES.containsKey(page)) {
-            VIEWED_PAGES.put(page, true);
+        if (!viewedPages.containsKey(page)) {
+            viewedPages.put(page, true);
         }
     }
 
@@ -58,13 +61,15 @@ public class RulebookGui extends BookGui {
     }
 
     private void acceptIfViewedAll() {
-        if (VIEWED_PAGES.size() == book.get(DataComponentTypes.WRITTEN_BOOK_CONTENT).getPages(false).size()) {
+        if (viewedPages.size() == book.get(DataComponentTypes.WRITTEN_BOOK_CONTENT).getPages(false).size()) {
             ConfigManager.accept(player);
         } else {
-            var playerUuid = player.getUuid();
-            JOIN_LIST.remove(playerUuid);
-            RULEBOOK_LIST.remove(playerUuid);
-            player.networkHandler.disconnect(Placeholders.parseText(TextParserUtils.formatText(ConfigManager.getConfig().kickMessages.didntRead), PlaceholderContext.of(player)));
+            if (kick) {
+                var playerUuid = player.getUuid();
+                joinedPlayers.remove(playerUuid);
+                rulebookPlayers.remove(playerUuid);
+                player.networkHandler.disconnect(Placeholders.parseText(Rulebook.PARSER.parseNode(ConfigManager.getConfig().kickMessages.didntRead), PlaceholderContext.of(player)));
+            }
         }
     }
 }

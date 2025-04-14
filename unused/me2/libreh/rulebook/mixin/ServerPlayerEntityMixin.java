@@ -16,8 +16,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.UUID;
 
-import static me.libreh.rulebook.Rulebook.JOIN_LIST;
-import static me.libreh.rulebook.Rulebook.RULEBOOK_LIST;
+import static me.libreh.rulebook.Rulebook.joinedPlayers;
+import static me.libreh.rulebook.Rulebook.rulebookPlayers;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin extends PlayerEntity {
@@ -38,17 +38,17 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
     private void tick(CallbackInfo ci) {
         rulebookTick++;
         if (rulebookTick == 4) {
-            if (JOIN_LIST.contains(playerUuid)) {
+            if (joinedPlayers.contains(playerUuid)) {
                 if (!ConfigManager.hasAccepted(player)) {
-                    if (!RULEBOOK_LIST.contains(playerUuid)) {
+                    if (!rulebookPlayers.contains(playerUuid)) {
                         if (!(player.currentScreenHandler instanceof BookScreenHandler)) {
-                            RULEBOOK_LIST.add(playerUuid);
+                            rulebookPlayers.add(playerUuid);
                             Rulebook.openBookGui(player);
                         }
                     }
                 } else {
-                    JOIN_LIST.remove(playerUuid);
-                    RULEBOOK_LIST.remove(playerUuid);
+                    joinedPlayers.remove(playerUuid);
+                    rulebookPlayers.remove(playerUuid);
                     player.closeHandledScreen();
                 }
             }
