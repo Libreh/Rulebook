@@ -1,12 +1,14 @@
-package me.libreh.rulebook.gui;
+package me.libreh.rulebook.ui;
 
 import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.sgui.api.elements.BookElementBuilder;
 import eu.pb4.sgui.api.gui.BookGui;
 import me.libreh.rulebook.Rulebook;
+import me.libreh.rulebook.util.RBUtil;
 import me.libreh.rulebook.config.ConfigManager;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.HashMap;
@@ -29,6 +31,8 @@ public class RulebookGui extends BookGui {
         super.onTakeBookButton();
 
         acceptIfViewedAll();
+        ItemStack rulebook = RBUtil.getRulebookStack(player);
+        player.giveItemStack(rulebook);
         player.closeHandledScreen();
     }
 
