@@ -8,9 +8,6 @@ import java.util.List;
 import java.util.UUID;
 
 public class Config {
-    public static final Config DEFAULT = new Config();
-    public String _comment = "Before changing anything, see https://github.com/Libreh/Rulebook#configuration";
-
     @SerializedName("config_version")
     public int version = ConfigManager.VERSION;
 

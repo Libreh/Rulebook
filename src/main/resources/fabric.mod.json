@@ -14,7 +14,7 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"me.libreh.rulebook.Rulebook"
+            "me.libreh.rulebook.Rulebook"
 		]
 	},
 	"mixins": [

@@ -2,8 +2,7 @@ package me.libreh.rulebook.mixin;
 
 import com.mojang.authlib.GameProfile;
 import eu.pb4.sgui.virtual.book.BookScreenHandler;
-import me.libreh.rulebook.Rulebook;
-import me.libreh.rulebook.config.ConfigManager;
+import me.libreh.rulebook.util.RBUtil;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
@@ -39,11 +38,11 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
         rulebookTick++;
         if (rulebookTick == 4) {
             if (joinedPlayers.contains(playerUuid)) {
-                if (!ConfigManager.hasAccepted(player)) {
+                if (!RBUtil.hasAccepted(player)) {
                     if (!rulebookPlayers.contains(playerUuid)) {
                         if (!(player.currentScreenHandler instanceof BookScreenHandler)) {
                             rulebookPlayers.add(playerUuid);
-                            Rulebook.openBookGui(player);
+                            RBUtil.openBookGui(player, true);
                         }
                     }
                 } else {

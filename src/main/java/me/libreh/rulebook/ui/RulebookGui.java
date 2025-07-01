@@ -61,14 +61,22 @@ public class RulebookGui extends BookGui {
     }
 
     private void acceptIfViewedAll() {
-        if (viewedPages.size() == book.get(DataComponentTypes.WRITTEN_BOOK_CONTENT).getPages(false).size()) {
-            ConfigManager.accept(player);
+        var data = book.get(DataComponentTypes.WRITTEN_BOOK_CONTENT);
+        assert data != null;
+        var pages = data.getPages(false);
+
+        if (viewedPages.size() == pages.size()) {
+            RBUtil.accept(player);
         } else {
             if (kick) {
                 var playerUuid = player.getUuid();
+
                 joinedPlayers.remove(playerUuid);
                 rulebookPlayers.remove(playerUuid);
-                player.networkHandler.disconnect(Placeholders.parseText(Rulebook.PARSER.parseNode(ConfigManager.getConfig().kickMessages.didntRead), PlaceholderContext.of(player)));
+
+                player.networkHandler.disconnect(Placeholders.parseText(Rulebook.PARSER.parseNode(
+                        ConfigManager.getConfig().kickMessages.didntRead),
+                        PlaceholderContext.of(player)));
             }
         }
     }
