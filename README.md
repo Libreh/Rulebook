@@ -11,21 +11,11 @@ You accept the rules by viewing all pages and closing the rulebook.
 You can close by clicking the `Done` or `Take Book` buttons, or pressing Escape on your keyboard.
 The `Take Book` button is not supposed to give the player the book (that's just what it says and AFAIK you can't change it server-side).
 
-## Commands (and permissions):
-- `/rulebook` and `/rules` - Displays the rules in chat (`rulebook.main`, available by default)
-- `/rulebook open` and `/rules open` - Displays the rules as a book (`rulebook.main`, available by default)
-- `/rulebook reload` - Reloads configuration (requires `rulebook.reload`)
-- `/rulebook update` - Resets all players' rule status and kicks them, forcing them to accept the rules again (requires `rulebook.update`)
-- `/rulebook update <players>` - Same as above but only for targeted players (requires `rulebook.update`)
-- `/rulebook update offline` - Same as above but only for offline players (requires `rulebook.update`)
-- `/rulebook accept` - Used for accepting the rules (`rulebook.main`, available by default)
-
 ## Configuration
+The config file is located at `config/rulebook.json`.
 ```json5
 // New lines can be added with `\n`!
 {
-  // You're on the right page! (Ha, get it?)
-  "_comment": "Before changing anything, see https://github.com/Libreh/Rulebook#configuration",
   // Do not touch!
   "config_version": 1,
   // Header at the top of each book page and at the top of the rules command
@@ -56,6 +46,18 @@ The `Take Book` button is not supposed to give the player the book (that's just 
   "accepted_players": []
 }
 ```
+
+## Commands and permissions
+
+| Command                        | Permission             | Description                                      |
+|--------------------------------|------------------------|--------------------------------------------------|
+| /rulebook reload               | rulebook.reload (op 3) | Reloads the config                               |
+| /rulebook and /rules           | rulebook.main (no op)  | Show rules in chat                               |
+| /rulebook open and /rules open | rulebook.main (no op)  | Show rules in book                               |
+| /rulebook update               | rulebook.main (op 3)   | Resets all players' rules and kicks them         |
+| /rulebook update <players>     | rulebook.main (op 3)   | Same as above but only for target players        |
+| /rulebook update offline       | rulebook.main (op 3)   | Same as above but target is only offline players |
+| /rulebook accept               | rulebook.main (no op)  | Accepts the rules                                |
 
 ## Credits
 - [LilydevMC/Rules](https://github.com/LilydevMC/Rules) [code and inspiration]
