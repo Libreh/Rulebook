@@ -4,84 +4,117 @@ import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.sgui.api.elements.BookElementBuilder;
 import eu.pb4.sgui.api.gui.BookGui;
-import me.libreh.rulebook.Rulebook;
-import me.libreh.rulebook.util.RBUtil;
+import me.libreh.rulebook.RulebookMod;
 import me.libreh.rulebook.config.ConfigManager;
+import me.libreh.rulebook.services.PlayerService;
+import me.libreh.rulebook.util.Utils;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.HashMap;
+import java.util.Map;
 
-import static me.libreh.rulebook.Rulebook.joinedPlayers;
-import static me.libreh.rulebook.Rulebook.rulebookPlayers;
+public final class RulebookGui extends BookGui {
+    private final boolean shouldKickOnIncomplete;
+    private final Map<Integer, Boolean> viewedPages;
+    private final PlayerService playerService;
 
-public class RulebookGui extends BookGui {
-    private final boolean kick;
-
-    public RulebookGui(ServerPlayerEntity player, BookElementBuilder book, boolean kick) {
+    public RulebookGui(ServerPlayerEntity player, BookElementBuilder book, boolean shouldKickOnIncomplete) {
         super(player, book);
-        this.kick = kick;
+        this.shouldKickOnIncomplete = shouldKickOnIncomplete;
+        this.viewedPages = new HashMap<>();
+        this.playerService = RulebookMod.getPlayerService();
     }
-
-    private final HashMap<Integer, Boolean> viewedPages = new HashMap<>();
-
+    
     @Override
     public void onTakeBookButton() {
         super.onTakeBookButton();
 
-        acceptIfViewedAll();
-        ItemStack rulebook = RBUtil.getRulebookStack(player);
-        player.giveItemStack(rulebook);
-        player.closeHandledScreen();
-    }
 
+        handleBookAcceptance();
+        if (hasViewedAllPages()) {
+            giveRulebookToPlayer();
+        }
+        closeGui();
+    }
+    
     @Override
     public void onTick() {
         super.onTick();
-
-        if (!viewedPages.containsKey(page)) {
-            viewedPages.put(page, true);
-        }
+        trackCurrentPage();
     }
-
+    
     @Override
     public void close(boolean screenHandlerIsClosed) {
-        acceptIfViewedAll();
-
+        handleBookAcceptance();
+        
         if (this.isOpen() && !this.reOpen) {
-            //noinspection removal
-            this.open = this.isOpen();
             this.reOpen = false;
-
+            
             if (!screenHandlerIsClosed && this.player.currentScreenHandler == this.screenHandler) {
                 this.player.closeHandledScreen();
             }
-
+            
             this.onClose();
         } else {
             this.reOpen = false;
         }
     }
 
-    private void acceptIfViewedAll() {
-        var data = book.get(DataComponentTypes.WRITTEN_BOOK_CONTENT);
-        assert data != null;
-        var pages = data.getPages(false);
-
-        if (viewedPages.size() == pages.size()) {
-            RBUtil.accept(player);
-        } else {
-            if (kick) {
-                var playerUuid = player.getUuid();
-
-                joinedPlayers.remove(playerUuid);
-                rulebookPlayers.remove(playerUuid);
-
-                player.networkHandler.disconnect(Placeholders.parseText(Rulebook.PARSER.parseNode(
-                        ConfigManager.getConfig().kickMessages.didntRead),
-                        PlaceholderContext.of(player)));
-            }
+    private void handleBookAcceptance() {
+        if (hasViewedAllPages()) {
+            acceptPlayer();
+        } else if (shouldKickOnIncomplete) {
+            kickPlayerForIncompleteReading();
         }
+    }
+
+    private boolean hasViewedAllPages() {
+        var data = book.get(DataComponentTypes.WRITTEN_BOOK_CONTENT);
+        if (data == null) {
+            RulebookMod.LOGGER.warn("Book content is null for player {}", player.getName().getString());
+            return false;
+        }
+        
+        var pages = data.getPages(false);
+        return viewedPages.size() >= pages.size();
+    }
+
+    private void acceptPlayer() {
+        Utils.accept(player);
+        var playerUuid = player.getUuid();
+
+        playerService.removePlayer(playerUuid);
+        
+        RulebookMod.LOGGER.info("Player {} accepted the rules", player.getName().getString());
+    }
+
+    private void kickPlayerForIncompleteReading() {
+        var playerUuid = player.getUuid();
+        var config = ConfigManager.getInstance().getConfig();
+
+        playerService.removePlayer(playerUuid);
+
+        var kickMessage = Placeholders.parseText(
+                RulebookMod.PARSER.parseNode(config.getKickMessages().getDidntRead()),
+                PlaceholderContext.of(player));
+        
+        player.networkHandler.disconnect(kickMessage);
+        RulebookMod.LOGGER.info("Player {} kicked for not reading all rules", player.getName().getString());
+    }
+
+    private void giveRulebookToPlayer() {
+        ItemStack rulebook = Utils.getRulebookStack(player);
+        player.giveItemStack(rulebook);
+        RulebookMod.LOGGER.debug("Gave rulebook to player {}", player.getName().getString());
+    }
+
+    private void closeGui() {
+        player.closeHandledScreen();
+    }
+
+    private void trackCurrentPage() {
+        viewedPages.put(page, true);
     }
 }
