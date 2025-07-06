@@ -4,85 +4,133 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import me.libreh.rulebook.Rulebook;
+import me.libreh.rulebook.RulebookMod;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 
-public class ConfigManager {
-    public static int VERSION = 1;
-    private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("rulebook.json");
-    private static final Path LEGACY_DATA = FabricLoader.getInstance().getGameDir().resolve("world/player-mod-data");
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-    private static final Config DEFAULT_CONFIG = new Config();
+public final class ConfigManager {
+    public static final int VERSION = 1;
+    private final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("rulebook.json");
+    private final Path LEGACY_DATA = FabricLoader.getInstance().getGameDir().resolve("world/player-mod-data");
 
-    private static Config CONFIG;
+    private static ConfigManager instance;
 
-    public static Config getConfig() {
-        if (CONFIG == null) {
-            return DEFAULT_CONFIG;
-        }
-        return CONFIG;
+    private final Gson gson;
+    private final Config defaultConfig;
+    private volatile Config config;
+
+    private ConfigManager() {
+        this.gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .disableHtmlEscaping()
+                .create();
+        this.defaultConfig = new Config();
     }
 
-    public static boolean loadConfig() {
-        boolean enabled;
+    public static ConfigManager getInstance() {
+        if (instance == null) {
+            instance = new ConfigManager();
+        }
+        return instance;
+    }
+
+    public Config getConfig() {
+        if (config == null) {
+            return defaultConfig;
+        }
+        return config;
+    }
+
+    public boolean loadConfig() {
         try {
             Files.createDirectories(CONFIG_PATH.getParent());
 
-            CONFIG = CONFIG_PATH.toFile().exists() ? GSON.fromJson(new InputStreamReader(new FileInputStream(CONFIG_PATH.toFile()), "UTF-8"), Config.class) : new Config();
-            if (Files.exists(LEGACY_DATA)) {
-                startMigration(CONFIG);
+            if (CONFIG_PATH.toFile().exists()) {
+                config = loadFromFile();
+            } else {
+                config = new Config();
             }
-            CONFIG.version = VERSION;
 
+            if (Files.exists(LEGACY_DATA)) {
+                migrateLegacyData(config);
+            }
+
+            config.setVersion(VERSION);
             saveConfig();
-            enabled = true;
-        } catch(Throwable exception) {
-            enabled = false;
-            Rulebook.LOGGER.error("Something went wrong while reading config!");
-            exception.printStackTrace();
+
+            return true;
+        } catch (Exception e) {
+            RulebookMod.LOGGER.error("Failed to load configuration from {}", CONFIG_PATH, e);
+            return false;
         }
-        return enabled;
     }
 
-    public static void saveConfig() {
+    public void saveConfig() {
         try {
-            Files.writeString(CONFIG_PATH, GSON.toJson(CONFIG));
-        } catch (Exception exception) {
-            Rulebook.LOGGER.error("Something went wrong while saving config!");
-            exception.printStackTrace();
+            if (config != null) {
+                Files.writeString(CONFIG_PATH, gson.toJson(config), StandardCharsets.UTF_8);
+                RulebookMod.LOGGER.debug("Configuration saved successfully to {}", CONFIG_PATH);
+            }
+        } catch (Exception e) {
+            RulebookMod.LOGGER.error("Failed to save configuration to {}", CONFIG_PATH, e);
         }
     }
 
-    private static void startMigration(Config config) throws IOException {
-        Rulebook.LOGGER.info("PlayerDataAPI directory exists, starting migration...");
+    private Config loadFromFile() throws IOException {
+        try (InputStreamReader reader = new InputStreamReader(
+                new FileInputStream(CONFIG_PATH.toFile()), StandardCharsets.UTF_8)) {
+            return gson.fromJson(reader, Config.class);
+        }
+    }
+
+    private void migrateLegacyData(Config config) throws IOException {
+        RulebookMod.LOGGER.info("Legacy PlayerDataAPI directory found, starting migration...");
+        
         Files.walk(LEGACY_DATA)
                 .filter(Files::isRegularFile)
                 .filter(path -> path.toString().endsWith(".json"))
                 .forEach(jsonFilePath -> {
-                    UUID playerUuid = UUID.fromString(jsonFilePath.getParent().getFileName().toString());
-                    if (!config.acceptedPlayers.contains(playerUuid)) {
-                        try(FileReader reader = new FileReader(jsonFilePath.toFile())) {
-                            JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
-
-                            if (jsonObject.has("hasAccepted") && jsonObject.get("hasAccepted").getAsBoolean()) {
-                                config.acceptedPlayers.add(playerUuid);
-                                Rulebook.LOGGER.info("Migrating {}", jsonFilePath.getParent().getFileName().toString());
+                    try {
+                        UUID playerUuid = extractPlayerUuid(jsonFilePath);
+                        if (playerUuid != null && !config.isPlayerAccepted(playerUuid)) {
+                            if (hasAcceptedRules(jsonFilePath)) {
+                                config.addAcceptedPlayer(playerUuid);
+                                RulebookMod.LOGGER.info("Migrated player data for UUID: {}", playerUuid);
                             }
-                        } catch (IOException e) {
-                            Rulebook.LOGGER.info("Error migrating UUID {}", jsonFilePath.getParent().getFileName());
-                            e.printStackTrace();
+                        } else if (playerUuid != null) {
+                            RulebookMod.LOGGER.debug("Skipping UUID {} as player has already accepted the rules", playerUuid);
                         }
-                    } else {
-                        Rulebook.LOGGER.info("Skipping UUID {} as player has already accepted the rules", jsonFilePath.getParent().getFileName());
+                    } catch (Exception e) {
+                        RulebookMod.LOGGER.warn("Error migrating player data from {}", jsonFilePath, e);
                     }
                 });
+    }
+
+    private UUID extractPlayerUuid(Path jsonFilePath) {
+        try {
+            String fileName = jsonFilePath.getParent().getFileName().toString();
+            return UUID.fromString(fileName);
+        } catch (IllegalArgumentException e) {
+            RulebookMod.LOGGER.warn("Invalid UUID format in path: {}", jsonFilePath);
+            return null;
+        }
+    }
+
+    private boolean hasAcceptedRules(Path jsonFilePath) {
+        try (FileReader reader = new FileReader(jsonFilePath.toFile())) {
+            JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+            return jsonObject.has("hasAccepted") && jsonObject.get("hasAccepted").getAsBoolean();
+        } catch (Exception e) {
+            RulebookMod.LOGGER.warn("Failed to parse legacy player data from {}", jsonFilePath, e);
+            return false;
+        }
     }
 }

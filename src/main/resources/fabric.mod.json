@@ -11,10 +11,11 @@
 		"sources": "https://github.com/Libreh/Rulebook"
 	},
 	"license": "LGPLv3",
+	"icon": "assets/rulebook/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-            "me.libreh.rulebook.Rulebook"
+          "me.libreh.rulebook.RulebookMod"
 		]
 	},
 	"mixins": [
@@ -22,7 +23,7 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.16.9",
-		"minecraft": "~1.21.4",
+		"minecraft": "~1.21.5",
 		"java": ">=21",
 		"fabric-api": "*"
 	}
