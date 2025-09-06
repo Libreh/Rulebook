@@ -11,7 +11,7 @@ Supports [Placeholder API](https://placeholders.pb4.eu/user/general/), [Simplifi
 ### Clarifications
 You accept the rules by viewing all pages and closing the rulebook.
 You can close by clicking the `Done` or `Take Book` buttons, or pressing Escape on your keyboard.
-The `Take Book` button is not supposed to give the player the book (that's just what it says and AFAIK you can't change it server-side).
+The `Take Book` button will give you an actual in-game rulebook item.
 
 ## Commands (and permissions):
 - `/rulebook` and `/rules` - Displays the rules in chat (`rulebook.main`, available by default)
